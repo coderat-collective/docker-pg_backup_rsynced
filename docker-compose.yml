@@ -4,5 +4,5 @@ services:
     build: .
     container_name: pg_backup_rsynced
     volumes:
-      - ${VOLUME_BACKUPS}:/mnt/backups            # backup destination
-      - ${VOLUME_CONFIG}:/mnt/config              # Directory with config files + crontab.txt
+      - ./data/backups:/mnt/backups            # backup destination
+      - ./data/config:/mnt/config              # Directory with config files + crontab.txt
