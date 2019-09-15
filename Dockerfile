@@ -1,8 +1,11 @@
 FROM postgres:alpine
 MAINTAINER coderat-collective
 
-COPY entry.sh /entry.sh
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+COPY docker-cmd.sh /docker-cmd.sh
+COPY data/scripts /scripts
 
 VOLUME /mnt/backups
 
-CMD ["/entry.sh"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["/docker-cmd.sh"]
