@@ -1,0 +1,2 @@
+MAILTO=""
+0 1 * * * PATH=$PATH:/usr/bin touch /mnt/backups/test 2>&1
