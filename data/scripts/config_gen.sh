@@ -17,7 +17,7 @@ USERNAME=${POSTGRES_USER-postgres}
  
 # This dir will be created if it doesn't exist.  This must be writable by the user the script is
 # running as.
-BACKUP_DIR=/backups/
+BACKUP_DIR=/mnt/backups/
  
 # List of strings to match against in database name, separated by space or comma, for which we only
 # wish to keep a backup of the schema, not the data. Any database names which contain any of these
