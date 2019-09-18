@@ -1,5 +1,12 @@
 version: '2'
 services:
+  web-postgres:
+    container_name: web-postgres
+    image: postgres:alpine
+    env_file: .env
+    environment:
+      - POSTGRES_DB=test
+
   pg_backup_rsynced:
     container_name: pg_backup_rsynced
     image: coderat/docker-pg_backup_rsynced
