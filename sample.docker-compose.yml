@@ -3,6 +3,7 @@ services:
   web-postgres:
     container_name: web-postgres
     image: postgres:alpine
+    hostname: web-postgres
     env_file: .env
     environment:
       - POSTGRES_DB=test
@@ -10,6 +11,7 @@ services:
   pg_backup_rsynced:
     container_name: pg_backup_rsynced
     image: coderat/docker-pg_backup_rsynced
+    hostname: pg_backup_rsynced
     env_file: .env
     volumes:
       - ./data/backups:/mnt/backups            # backup destination

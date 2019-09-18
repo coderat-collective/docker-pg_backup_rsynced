@@ -2,6 +2,7 @@ version: '2'
 services:
   pg_backup_rsynced:
     container_name: pg_backup_rsynced
+    hostname: pg_backup_rsynced
     image: coderat/docker-pg_backup_rsynced
     env_file: .env
     volumes:
