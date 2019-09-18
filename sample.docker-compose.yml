@@ -9,7 +9,7 @@ services:
 
   pg_backup_rsynced:
     container_name: pg_backup_rsynced
-    build: .
+    image: coderat/docker-pg_backup_rsynced
     env_file: .env
     volumes:
       - ./data/backups:/mnt/backups            # backup destination

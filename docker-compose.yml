@@ -1,8 +1,11 @@
 version: '2'
 services:
   pg_backup_rsynced:
-    build: .
     container_name: pg_backup_rsynced
+    image: coderat/docker-pg_backup_rsynced
+    env_file: .env
     volumes:
       - ./data/backups:/mnt/backups            # backup destination
       - ./data/config:/mnt/config              # Directory with config files + crontab.txt
+    expose:
+      - '5432'
