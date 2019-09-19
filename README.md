@@ -1,7 +1,7 @@
 # docker-pg_backup_rsynced
 
 Docker container backing up postgresql databases and syncing them to remote storage location.
-The [pg_backup_rotated.sh](https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux) bash script is used to create rotated sql dumps. The syncronisation is done via the [rsync](https://rsync.samba.org/) tool.
+The [pg_backup_rotated.sh](https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux) bash script is used to create rotated sql dumps. The synchronization is done via the [rsync](https://rsync.samba.org/) tool.
 
 Cron is used to run the backups and sync commands. Configure the cron entry and commands in [./data/config/crontab.txt](data/config/crontab.txt)
 You can configure the pg_backup_rotated.sh script with environment variables or place you own [pg_backup.config](https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux)
@@ -12,7 +12,7 @@ If you want to use a modified [pg_backup_rotated.sh](https://wiki.postgresql.org
 If you want to just use the [pg_backup_rotated.sh](https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux) bash script you can delete the rsync command from `./data/config/crontab.txt`.
 
 To use rsync you have to mount a known_hosts file and ssh keys to `/root/.ssh/`.
-Note if you dont mount a folder as backup storage to `/mnt/backups` and delete the container
+Note if you don't mount a folder as backup storage to `/mnt/backups` and delete the container
 all local backups are gone and rsync will sync the deleted state to you remote host.
 
 The basic workflow of this container is inspired by:
@@ -113,7 +113,7 @@ services:
 
 #### mail msmtp
 - `MAILTO`           - mail address receiving cron output 
-- `MAIL_RELAY_HOST`  - mail server used for realying
+- `MAIL_RELAY_HOST`  - mail server used for relaying
 - `MAIL_PORT`        - port where the relay mail server is accepting connections
 - `MAIL_FROM`        - mail from
 - `MAIL_USER`        - user name loging in on the relay mail server
@@ -124,7 +124,7 @@ services:
 Destination for backups created by [pg_backup_rotated.sh](https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux)
 
 #### /mnt/config
-Container config files before env var substituation. Config via env vars or mount you custom configs here.
+Container config files before env var substitution. Config via env vars or mount you custom configs here.
   * [crontab.txt](data/config/crontab.txt)
   * [pg_backup.config](data/config/pg_backup.config)
   * [msmtprc](data/config/msmtprc)
