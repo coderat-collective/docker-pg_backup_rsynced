@@ -23,6 +23,7 @@ RUN chmod +x /usr/local/bin/envsubst
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 COPY docker-cmd.sh /docker-cmd.sh
 COPY data/scripts /scripts
+COPY data/config /mnt/config
 
 VOLUME /mnt/backups
 
