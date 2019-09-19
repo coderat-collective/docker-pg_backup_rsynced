@@ -1,8 +1,17 @@
 FROM postgres:alpine
 MAINTAINER coderat-collective
 
-RUN apk upgrade --no-cache \
-    && apk add --no-cache \
+RUN apk update && apk upgrade
+
+# Setup Mail
+RUN apk add --no-cache \
+    msmtp \
+    openssl \
+    ca-certificates
+RUN ln -sf /usr/bin/msmtp /usr/sbin/sendmail
+
+
+RUN apk add --no-cache \
     curl \
     openssh \
     rsync
