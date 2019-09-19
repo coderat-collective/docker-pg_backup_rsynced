@@ -16,8 +16,8 @@ RUN apk add --no-cache \
     openssh \
     rsync
 
-# Install envsubst
-RUN curl -L https://github.com/a8m/envsubst/releases/download/v1.1.0/envsubst-`uname -s`-`uname -m` -o /usr/local/bin/envsubst
+# Install latest envsubst from github
+RUN curl -s https://api.github.com/repos/a8m/envsubst/releases/latest | grep "browser_download_url.*Linux" | cut -d : -f 2,3 | tr -d \" | xargs curl -s -L  -o /usr/local/bin/envsubst
 RUN chmod +x /usr/local/bin/envsubst
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
