@@ -3,18 +3,22 @@ services:
   web-postgres:
     container_name: web-postgres
     image: postgres:alpine
+    hostname: web-postgres
     env_file: .env
     environment:
       - POSTGRES_DB=test
+    expose:
+      - '5432'
 
   pg_backup_rsynced:
     container_name: pg_backup_rsynced
     image: coderat/docker-pg_backup_rsynced
+    hostname: pg_backup_rsynced
     env_file: .env
     volumes:
       - ./data/backups:/mnt/backups            # backup destination
       - ./data/config:/mnt/config              # Directory with config files + crontab.txt
       - ./data/ssh/id_rsa:/root/.ssh/id_rsa
       - ./data/ssh/known_hosts:/root/.ssh/known_hosts
-    expose:
-      - '5432'
+    links:
+      - web-postgres
