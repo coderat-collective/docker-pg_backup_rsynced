@@ -5,7 +5,9 @@ The [pg_backup_rotated.sh](https://wiki.postgresql.org/wiki/Automated_Backup_on_
 
 Cron is used to run the backups and sync commands. Configure the cron entry and commands in [./data/config/crontab.txt](data/config/crontab.txt)
 You can configure the pg_backup_rotated.sh script with environment variables or place you own [pg_backup.config](https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux)
-at `/scripts/pg_backup.config`. If you want to use a modified [pg_backup_rotated.sh](https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux) mount you version to `/scripts/pg_backup_rotated.sh`
+at `/scripts/pg_backup.config`.  To mail the cron output if needed the simple [msmtp](https://github.com/marlam/msmtp-mirror) mta is used.
+
+If you want to use a modified [pg_backup_rotated.sh](https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux) mount you version to `/scripts/pg_backup_rotated.sh`
 
 If you want to just use the [pg_backup_rotated.sh](https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux) bash script you can delete the rsync command from `./data/config/crontab.txt`.
 
@@ -18,30 +20,52 @@ The basic workflow of this container is inspired by:
 * [martianrock/docker-pg_backup](https://github.com/martianrock/docker-pg_backup)
 
 ### Usage
-* Edit the [crontab.txt](data/config/crontab.txt] to adjust the timing of the backup and sync commands. The default
-    crontab entry for [pg_backup_rotated.sh](https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux) only emits
-    Stderr which are send to a mail address.
+* Edit the [crontab.txt](data/config/crontab.txt) to adjust the timing of the backup and sync commands. The default crontab entry for [pg_backup_rotated.sh](https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux) only emits stderr 
+* Configure the pg_backup script via env vars or place your own [pb_backup.conf](data/config/pg_backup.conf) at `/mnt/config/pb_backup.conf`
+* If you want to mail cron output configure [msmtp](https://github.com/marlam/msmtp-mirror) via environment variables or place your own [msmtprc](data/config/msmtprc) at `/mnt/config/msmtprc`
 * Start the container with mounted:
   * backup folder `./backups:/mnt/backups`
-  * ssh files:
+  * ssh files if you want to rsync:
     * ssh private key `./ssh_private_key:/root/.ssh/id_rsa`
     * known_hosts file `./known_hosts:/root/.ssh/known_hosts`
 
 ### Examples
 #### Run command
+Basic:
 ```
 docker run \
   --detach --name  pg_backup_rsynced\
   -v /srv/web/database-backup/docker-pg_backup_rsynced/data/backups:/mnt/backups \
   -v /srv/web/database-backup/docker-pg_backup_rsynced/data/config:/mnt/config \
-  -v /srv/web/database-backup/docker-pg_backup_rsynced/data/.ssh:/root/.ssh \
+  -v /srv/web/database-backup/docker-pg_backup_rsynced/data/.ssh/id_rsa:/root/.ssh/id_rsa \
+  -v /srv/web/database-backup/docker-pg_backup_rsynced/data/.ssh/known_hosts:/root/.ssh/known_hosts \
   -e TZ=Europe/Berlin \
   -e POSTGRES_HOSTNAME=web_postgres \
   -e POSTGRES_USER=web_postgres_admin \
   -e POSTGRES_PASSWORD=superS3cretPasswd \
   coderat-collective/docker-pg_backup_rsynced
 ```
+With Mail:
+```
+docker run \
+  --detach --name  pg_backup_rsynced\
+  -v /srv/web/database-backup/docker-pg_backup_rsynced/data/backups:/mnt/backups \
+  -v /srv/web/database-backup/docker-pg_backup_rsynced/data/config:/mnt/config \
+  -v /srv/web/database-backup/docker-pg_backup_rsynced/data/.ssh/id_rsa:/root/.ssh/id_rsa \
+  -v /srv/web/database-backup/docker-pg_backup_rsynced/data/.ssh/known_hosts:/root/.ssh/known_hosts \
+  -e TZ=Europe/Berlin \
+  -e POSTGRES_HOSTNAME=web_postgres \
+  -e POSTGRES_USER=web_postgres_admin \
+  -e POSTGRES_PASSWORD=superS3cretPasswd \
+  -e MAIL_RELAY_HOST=mail.example.com \
+  -e MAIL_PORT=587 \
+  -e MAIL_FROM=pg_backup_rsynced \
+  -e MAIL_USER=backup_log \
+  -e MAIL_PASSWORD=yourMailP4ssword \
+  coderat-collective/docker-pg_backup_rsynced
+```
 #### In a compose file
+Use [sample.env](sample.env) to create your own `.env` file
 ```
 version: '2'
 services:
@@ -51,6 +75,8 @@ services:
     env_file: .env
     environment:
       - POSTGRES_DB=web_project_production
+    expose:
+      - '5432'
 
   pg_backup_rsynced:
     container_name: pg_backup_rsynced
@@ -59,14 +85,17 @@ services:
     volumes:
       - ./data/backups:/mnt/backups            # backup destination
       - ./data/config:/mnt/config              # Directory with config files + crontab.txt
-    expose:
-      - '5432'
+      - ./data/ssh/id_rsa:/root/.ssh/id_rsa
+      - ./data/ssh/known_hosts:/root/.ssh/known_hosts
+    links:          
+      - web-postgres
 ```
 
 ### Environment
 - `TZ=Europe/Berlin` - Time zone
-- `MAILTO`           - mail address receiving cron output 
+- `REMOTE_BACKUP_STORAGE=webbackup@web.example.com:database/` - ssh endpoint for rsync
 
+#### pg_backup
 - `POSTGRES_HOSTNAME`      - database container or ip/hostname of databaseserver
 - `POSTGRES_USER`          - user to connect as ('postgres' by default)
 - `POSTGRES_PASSWORD`      - password of POSTGRES_USER
@@ -79,15 +108,26 @@ services:
 - `ENABLE_CUSTOM_BACKUPS`  - will produce a custom-format backup if set to "yes" (default)
 - `SCHEMA_ONLY_LIST`       - List of strings to match against in database name, separated by space or comma, for which we only wish to keep a backup of the schema, not the data. Any database names which contain any of these values will be considered candidates. (e.g. "system_log" will match "dev_system_log_2010-01"). Default is empty list.
 
+#### mail msmtp
+- `MAILTO`           - mail address receiving cron output 
+- `MAIL_RELAY_HOST`  - mail server used for realying
+- `MAIL_PORT`        - port where the relay mail server is accepting connections
+- `MAIL_FROM`        - mail from
+- `MAIL_USER`        - user name loging in on the relay mail server
+- `MAIL_PASSWORD`    - password used for loging in on the relay mail server
+
 ### Layout
 #### /mnt/backups
 Destination for backups created by [pg_backup_rotated.sh](https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux)
 
 #### /mnt/config
-Container config files like [crontab.txt](data/config/crontab.txt] live here.
+Container config files before env var substituation. Config via env vars or mount you custom configs here.
+  * [crontab.txt](data/config/crontab.txt)
+  * [pg_backup.config](data/config/pg_backup.config)
+  * [msmtprc](data/config/msmtprc)
 
 #### /scripts
-Generated config files and scripts are placed here. Place your own [pg_backup_rotated.sh](https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux) or [pg_backup.config](https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux) if you need to but watch out to not overwrite the other scripts.
+Generated config files and scripts are placed here. Place your own [pg_backup_rotated.sh](https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux).
 
 #### /root/.ssh/
 Mount here your ssh keys and known_host file for ssh connection to your backup storage server.
