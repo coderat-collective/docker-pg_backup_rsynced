@@ -4,4 +4,4 @@ MAILTO=${MAILTO-""}
 10 1 * * * /scripts/pgpass.sh /scripts/pg_backup_rotated.sh -c /scripts/pg_backup.config  2>&1 >/dev/null
 
 # Rsync database dumps to backup storage server
-15 1 * * * rsync -az --delete -e 'ssh -i /root/.ssh/id_rsa' /mnt/backups/ ${REMOTE_BACKUP_STORAGE}
+15 1 * * * rsync -avz --delete -e 'ssh -v -i /root/.ssh/id_rsa' /mnt/backups/ ${REMOTE_BACKUP_STORAGE} 2>&1 >/dev/null
