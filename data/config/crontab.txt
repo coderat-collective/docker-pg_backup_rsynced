@@ -1,4 +1,4 @@
-MAILTO="${MAILTO}"
+MAILTO=${MAILTO-""}
 
 # Create Backups; Standart output stdout is deleted and replaced by stderr
 10 1 * * * /scripts/pgpass.sh /scripts/pg_backup_rotated.sh -c /scripts/pg_backup.config  2>&1 >/dev/null
