@@ -20,14 +20,17 @@ The basic workflow of this container is inspired by:
 * [martianrock/docker-pg_backup](https://github.com/martianrock/docker-pg_backup)
 
 ### Usage
-* Edit the [crontab.txt](data/config/crontab.txt) to adjust the timing of the backup and sync commands. The default crontab entry for [pg_backup_rotated.sh](https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux) only emits stderr 
-* Configure the pg_backup script via env vars or place your own [pb_backup.conf](data/config/pg_backup.conf) at `/mnt/config/pb_backup.conf`
-* If you want to mail cron output configure [msmtp](https://github.com/marlam/msmtp-mirror) via environment variables or place your own [msmtprc](data/config/msmtprc) at `/mnt/config/msmtprc`
+* Create your `.env` file from [sample.env](sample.env). You can configure the
+    [pg_backup_rotated.sh](https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux) script, the [msmtp](https://github.com/marlam/msmtp-mirror) used by crontab and the ssh backend for [rsync](https://rsync.samba.org/)
+* For further configuration you can mount your config files and scripts. Env vars will still be replaced at container startup:
+  * [crontab.txt](data/config/crontab.txt) -> `/mnt/config/crontab.txt`
+  * [pg_backup_rotated.sh](data/scripts/pg_backup_rotated.sh) mount you version to `/scripts/pg_backup_rotated.sh`
+  * [pb_backup.conf](data/config/pg_backup.conf) -> `/mnt/config/pb_backup.conf`
+  * [msmtprc](data/config/msmtprc) at `/mnt/config/msmtprc`
 * Start the container with mounted:
   * backup folder `./backups:/mnt/backups`
-  * ssh files if you want to rsync:
-    * ssh private key `./ssh_private_key:/root/.ssh/id_rsa`
-    * known_hosts file `./known_hosts:/root/.ssh/known_hosts`
+  * ssh private key `./ssh_private_key:/root/.ssh/id_rsa`
+  * known_hosts file `./known_hosts:/root/.ssh/known_hosts`
 
 ### Examples
 #### Run command
