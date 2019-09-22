@@ -25,7 +25,7 @@ The basic workflow of this container is inspired by:
 * For further configuration you can mount your config files and scripts. Env vars will still be replaced at container startup:
   * [crontab.txt](data/config/crontab.txt) -> `/mnt/config/crontab.txt`
   * [pg_backup_rotated.sh](data/scripts/pg_backup_rotated.sh) mount you version to `/scripts/pg_backup_rotated.sh`
-  * [pb_backup.conf](data/config/pg_backup.conf) -> `/mnt/config/pb_backup.conf`
+  * [pb_backup.conf](data/config/pg_backup.config) -> `/mnt/config/pb_backup.conf`
   * [msmtprc](data/config/msmtprc) at `/mnt/config/msmtprc`
 * Start the container with mounted:
   * backup folder `./backups:/mnt/backups`
